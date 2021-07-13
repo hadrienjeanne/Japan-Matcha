@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/scenes/game/Grid.gd" type="Script" id=1]
+
+[node name="Grid" type="Node2D"]
+script = ExtResource( 1 )
+empty_spaces = PoolVector2Array( 0, 0, 8, 8, 8, 0, 0, 8 )
+
+[node name="MoveTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+
+[node name="DestroyTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true
+
+[node name="CollapseTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true
+
+[node name="RefillTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true
+
+[connection signal="timeout" from="DestroyTimer" to="." method="_on_DestroyTimer_timeout"]
+[connection signal="timeout" from="CollapseTimer" to="." method="_on_CollapseTimer_timeout"]
+[connection signal="timeout" from="RefillTimer" to="." method="_on_RefillTimer_timeout"]

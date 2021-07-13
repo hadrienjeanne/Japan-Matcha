@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/scenes/pieces/Piece.gd" type="Script" id=1]
+
+[node name="Piece" type="Node2D" groups=[
+"Piece",
+]]
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 0.375, 0.375 )
+
+[node name="MoveTween" type="Tween" parent="."]
+
+[node name="DestroyAnimation" type="AnimatedSprite" parent="."]
