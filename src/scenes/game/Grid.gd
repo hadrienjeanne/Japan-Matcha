@@ -166,7 +166,15 @@ func match_at(col: int, row: int, color: String) -> bool:
 		if below_piece != null && below2_piece != null:
 			if below_piece.color == color && below2_piece.color == color:
 				return true
-	
+
+	# check square
+	if row > 0 and col > 0 :
+		var left_piece = grid[col - 1][row]
+		var below_piece = grid[col][row - 1]
+		var below_left_piece = grid[col - 1][row - 1]
+		if left_piece != null && below_left_piece != null && below_piece != null:
+			if left_piece.color == color && below_piece.color == color && below_left_piece.color == color:
+				return true
 	return false
 
 func draw_background() -> void:
@@ -187,10 +195,10 @@ func destroy_matched() -> void:
 			if _piece != null and _piece.matched: # piece or booster to restrict to pieces only: and _piece.is_in_group("Piece"):
 				damage_specials(Vector2(i, j))
 				if _piece.is_in_group("Piece"):
-					#_piece.destroy(i, j)
+					# _piece.destroy(i, j)
 					emit_signal("piece_destroyed", _piece.color)
 				elif _piece.is_in_group("Booster"):
-					_piece.fire(Vector2(i, j))
+					#_piece.fire(Vector2(i, j))
 					if _piece.is_in_group("ColBooster"):
 						emit_signal("col_booster_destroyed")
 					elif _piece.is_in_group("RowBooster"):
@@ -200,7 +208,7 @@ func destroy_matched() -> void:
 					elif _piece.is_in_group("ColorBooster"):
 						emit_signal("color_booster_destroyed")					
 				_piece.destroy(i, j)
-				grid[i][j] = null	
+				grid[i][j] = null
 	collapse_timer.start()
 	current_matches.clear()
 
@@ -380,10 +388,11 @@ func propagate_matched_boosters() -> bool:
 	for i in width:
 		for j in height:
 			if grid[i][j] != null and grid[i][j].is_in_group("Booster"):
-				if grid[i][j].matched:
+				if grid[i][j].matched:					
 					grid[i][j].fire(Vector2(i, j))
+					grid[i][j].destroy(i, j)
 					matches = true
-	# destroy_matched() # TODO, is it necessary ? bugs on the sides without
+	destroy_matched() # TODO, is it necessary ? bugs on the sides without
 	return matches
 
 ##
