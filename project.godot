@@ -9,13 +9,49 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Booster",
+"class": "BombBooster",
+"language": "GDScript",
+"path": "res://src/scenes/boosters/BombBooster.gd"
+}, {
+"base": "Node2D",
+"class": "Booster",
+"language": "GDScript",
+"path": "res://src/scenes/boosters/Booster.gd"
+}, {
+"base": "Booster",
+"class": "ColorBooster",
+"language": "GDScript",
+"path": "res://src/scenes/boosters/ColorBooster.gd"
+}, {
+"base": "Booster",
+"class": "ColumnBooster",
+"language": "GDScript",
+"path": "res://src/scenes/boosters/ColumnBooster.gd"
+}, {
+"base": "Booster",
+"class": "HelicoBooster",
+"language": "GDScript",
+"path": "res://src/scenes/boosters/HelicoBooster.gd"
+}, {
 "base": "Node2D",
 "class": "Piece",
 "language": "GDScript",
 "path": "res://src/scenes/pieces/Piece.gd"
+}, {
+"base": "Booster",
+"class": "RowBooster",
+"language": "GDScript",
+"path": "res://src/scenes/boosters/RowBooster.gd"
 } ]
 _global_script_class_icons={
-"Piece": ""
+"BombBooster": "",
+"Booster": "",
+"ColorBooster": "",
+"ColumnBooster": "",
+"HelicoBooster": "",
+"Piece": "",
+"RowBooster": ""
 }
 
 [application]

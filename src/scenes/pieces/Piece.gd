@@ -10,7 +10,7 @@ export (String) var color
 var matched := false setget set_matched
 
 # effects 
-# var destroy_effect := preload("res://Scenes/Effects/StarEffect.tscn")
+var destroy_effect := preload("res://src/scenes/effects/DestroyEffect.tscn")
 
 func move(target: Vector2) -> void:
 	var _err := move_tween.interpolate_property(self, "position", position, target, 0.3, Tween.TRANS_BOUNCE, Tween.EASE_OUT)
@@ -35,6 +35,6 @@ func destroy(col:int, row:int) -> void:
 	destroy_anim.play("default")
 	yield(destroy_anim, "animation_finished")
 	queue_free()
-	# var _effect := destroy_effect.instance()
-	# _effect.position =  get_parent().grid_to_pixel(col, row)
-	# get_parent().add_child(_effect)
+	var _effect := destroy_effect.instance()
+	_effect.position =  get_parent().grid_to_pixel(col, row)
+	get_parent().add_child(_effect)

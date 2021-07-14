@@ -1,4 +1,5 @@
 extends Node2D
+# grid is placed 
 
 # warning-ignore-all:narrowing-conversion
 
@@ -32,11 +33,11 @@ var pieces = [
 enum {BLUE, GREEN, BROWN, RED, YELLOW}
 
 var boosters = [
-# 	preload("res://Scenes/Boosters/RowBooster.tscn"),
-# 	preload("res://Scenes/Boosters/ColumnBooster.tscn"),
-# 	preload("res://Scenes/Boosters/BombBooster.tscn"),
-# 	preload("res://Scenes/Boosters/ColorBooster.tscn"),
-# 	preload("res://Scenes/Boosters/HelicoBooster.tscn"),
+	preload("res://src/scenes/boosters/RowBooster.tscn"),
+	preload("res://src/scenes/boosters/ColumnBooster.tscn"),
+	preload("res://src/scenes/boosters/BombBooster.tscn"),
+	preload("res://src/scenes/boosters/ColorBooster.tscn"),
+	preload("res://src/scenes/boosters/HelicoBooster.tscn"),
 ]
 
 enum {ROW_BOOSTER, COL_BOOSTER, BOMB_BOOSTER, COLOR_BOOSTER, HELICO_BOOSTER}
@@ -93,7 +94,7 @@ func touch_input() -> void:
 			if find_matches():
 				moves -= 1
 				emit_signal("move_played", moves)
-				# var _matches := propagate_matched_boosters()				
+				propagate_matched_boosters()
 				destroy_timer.start()
 			else:
 				yield(move_timer, "timeout")
@@ -117,6 +118,25 @@ func spawn_pieces(avoid_matches: bool) -> void:
 					p.position = grid_to_pixel(i, j + spawn_offset)
 					p.move(grid_to_pixel(i, j))
 					grid[i][j] = p
+	if find_matches():
+		propagate_matched_boosters()
+		destroy_timer.start()
+		
+	else: # new turn
+		if moves > 0:
+			# TODO SLIMES
+			# if !slime_holder.slime_damaged_during_turn && state == WAIT:
+			# 	slime_holder.generate_slime()
+			# slime_holder.slime_damaged_during_turn = false
+			state = MOVE
+		else: # game over
+			if conditions_fulfilled:
+				emit_signal("game_won")
+				print_debug("game won")
+			else:
+				emit_signal("game_over")
+				print_debug("game over")
+	
 
 # swaps between the piece at position (col, row) and the piece in the direction passed in arguement
 func swap_pieces(col:int, row: int, direction: Vector2) -> void:
@@ -198,7 +218,8 @@ func find_matches() -> bool:
 		elif piece_one.is_in_group("Booster") and piece_two.is_in_group("Booster"):
 			piece_one.matched = true
 			piece_two.matched = true
-			print_debug("mixed booster")		
+			print_debug("mixed booster")
+			# TODO soucis
 			found_match = true
 	if !found_match:
 		for i in width:
@@ -252,8 +273,84 @@ func find_matches() -> bool:
 	return found_match
 
 # searches for bombs in the current_matches array
-func find_boosters() -> void:
-	pass
+func find_boosters() -> Array:
+	var found_boosters := []
+	
+	if current_matches.size() > 3:
+			
+		for pos in current_matches:
+			var _col : int = pos.x
+			var _row : int = pos.y
+			if grid[_col][_row].is_in_group("Piece"):
+				var _color :String = grid[_col][_row].color
+				
+				var _col_matched := 0
+				var _row_matched := 0
+				
+				for pos2 in current_matches:
+					var _this_col : int = pos2.x
+					var _this_row : int = pos2.y				
+					if grid[_this_col][_this_row].is_in_group("Piece"):
+						var _this_color : String = grid[_this_col][_this_row].color
+						if _this_col == _col and _this_color == _color:
+							_col_matched += 1
+						if _this_row == _row and _this_color == _color:
+							_row_matched += 1
+				print_debug("matches: ", current_matches, " col matched: ", _col_matched, " row matched: ", _row_matched)
+				if _col_matched == 5 or _row_matched == 5:
+					make_booster(COLOR_BOOSTER)
+					found_boosters.append(COLOR_BOOSTER)
+					break
+				elif _row_matched == 4:
+					make_booster(COL_BOOSTER)
+					found_boosters.append(COL_BOOSTER)
+					break
+				elif _col_matched == 4:
+					make_booster(ROW_BOOSTER)
+					found_boosters.append(ROW_BOOSTER)
+					break
+				elif _row_matched >= 3 and _col_matched >= 3:
+					make_booster(BOMB_BOOSTER)
+					found_boosters.append(BOMB_BOOSTER)
+					break
+				elif (_row_matched == 2 and _col_matched >= 2) or (_row_matched >= 2 and _col_matched == 2):
+					make_booster(HELICO_BOOSTER)
+					found_boosters.append(HELICO_BOOSTER)
+					break
+			if found_boosters.size() > 0:
+				break
+	return found_boosters
+
+# make the swapped piece (piece_one or piece_two) the booster of type type
+func make_booster(type: int) -> void:
+	var booster_made := false
+	for pos in current_matches:
+		var _col :int = pos.x
+		var _row :int = pos.y
+		if grid[_col][_row] == piece_one:
+			# make piece_one a booster
+			piece_one.queue_free()
+			var b = boosters[type].instance()
+			add_child(b)
+			b.position = grid_to_pixel(_col, _row)
+			grid[_col][_row] = b
+			booster_made = true
+		elif grid[_col][_row] == piece_two:
+			# make piece_two a booster
+			piece_two.queue_free()
+			var b = boosters[type].instance()
+			add_child(b)
+			b.position = grid_to_pixel(_col, _row)
+			grid[_col][_row] = b
+			booster_made = true
+	if !booster_made:
+		var _col :int = current_matches[0].x
+		var _row :int = current_matches[0].y
+		grid[_col][_row].queue_free()
+		var b = boosters[type].instance()
+		add_child(b)
+		b.position = grid_to_pixel(_col, _row)
+		grid[_col][_row] = b
 
 # damage of special pieces
 func damage_specials(pos: Vector2) -> void:
@@ -278,6 +375,17 @@ func collapse_columns() -> void:
 						break
 	refill_timer.start()
 
+func propagate_matched_boosters() -> bool:
+	var matches := false
+	for i in width:
+		for j in height:
+			if grid[i][j] != null and grid[i][j].is_in_group("Booster"):
+				if grid[i][j].matched:
+					grid[i][j].fire(Vector2(i, j))
+					matches = true
+	# destroy_matched() # TODO, is it necessary ? bugs on the sides without
+	return matches
+
 ##
 ## Signal timers
 ##
@@ -299,14 +407,14 @@ func _on_RefillTimer_timeout() -> void:
 # output: the position in pixels of the piece
 func grid_to_pixel(col: int, row: int) -> Vector2:
 	var new_x := cell_size * col
-	var new_y := cell_size * row
+	var new_y := -cell_size * row
 	return Vector2(new_x, new_y)
 
 # input: a position in pixels of the mouse 
 # output: the column and the row number for the piece
 func pixel_to_grid(x: float, y: float) -> Vector2:
 	var col := round(x / float(cell_size))
-	var row := round(y / float(cell_size))
+	var row := round(y / float(-cell_size))
 	return Vector2(col, row)
 
 # tells whether the position pos is inside the grid 
