@@ -198,7 +198,7 @@ func destroy_matched() -> void:
 					# _piece.destroy(i, j)
 					emit_signal("piece_destroyed", _piece.color)
 				elif _piece.is_in_group("Booster"):
-					#_piece.fire(Vector2(i, j))
+					_piece.fire(Vector2(i, j))
 					if _piece.is_in_group("ColBooster"):
 						emit_signal("col_booster_destroyed")
 					elif _piece.is_in_group("RowBooster"):
@@ -390,9 +390,9 @@ func propagate_matched_boosters() -> bool:
 			if grid[i][j] != null and grid[i][j].is_in_group("Booster"):
 				if grid[i][j].matched:					
 					grid[i][j].fire(Vector2(i, j))
-					grid[i][j].destroy(i, j)
+					# grid[i][j].destroy(i, j)
 					matches = true
-	destroy_matched() # TODO, is it necessary ? bugs on the sides without
+	# destroy_matched() # TODO, is it necessary ? bugs without?
 	return matches
 
 ##
